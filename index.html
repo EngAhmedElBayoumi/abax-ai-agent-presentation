@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>عرض مفصل لوكلاء الذكاء الاصطناعي</title>
+  <!-- Custom styles -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="presentation">
+    <!-- Navigation Controls -->
+    <button class="nav-button prev" aria-label="السابق">❯</button>
+    <button class="nav-button next" aria-label="التالي">❮</button>
+    <!-- Progress Indicator -->
+    <div class="progress">
+      <div class="progress-bar"></div>
+    </div>
+    <!-- Slides Container -->
+    <div class="slides">
+      <!-- Slide 0: Title -->
+      <section class="slide" id="slide-0" data-bg="assets/slide_bg1.png">
+        <div class="content title-slide">
+          <h1 class="title">دليل وكلاء الذكاء الاصطناعي لنظام السفر</h1>
+          <p class="subtitle">عرض تفاعلي مفصل</p>
+        </div>
+        <div class="footnotes"></div>
+      </section>
+      <!-- Slide 1: Contents -->
+      <section class="slide" id="slide-1" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>فهرس المحتويات</h2>
+          <ul class="agenda-list">
+            <li>مقدمة و&nbsp;حلقة&nbsp;ReAct</li>
+            <li>وكيل العمليات</li>
+            <li>وكيل المالية</li>
+            <li>وكيل التسعير</li>
+            <li>وكيل المخزون</li>
+            <li>وكيل التوصيات</li>
+            <li>وكيل الحجوزات</li>
+            <li>وكيل إعادة التسكين</li>
+            <li>وكيل إعادة التخطيط</li>
+            <li>المساعد الذكي</li>
+            <li>تنسيق الوكلاء المتعددين</li>
+          </ul>
+          <canvas id="agendaChart" width="600" height="300"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-agenda-1">[1]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 2: Introduction & ReAct Loop -->
+      <section class="slide" id="slide-2" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>مقدمة وحلقة&nbsp;ReAct</h2>
+          <p>
+            تم تطوير نظام ABAX لتقديم خدمات سفر شاملة تتضمن إدارة الحجوزات، التسعير، المخزون، التوصيات وغير ذلك. كل وكيل في المنصة يعمل ضمن دورة
+            <strong>ReAct</strong> حيث يفكر، ثم ينفذ أداة معينة، ثم يلاحظ النتائج، قبل أن يقرر الخطوة التالية.
+          </p>
+          <div class="react-flow">
+            <div class="react-step">Think<br /><span>تفكير</span></div>
+            <div class="arrow">→</div>
+            <div class="react-step">Act<br /><span>تنفيذ</span></div>
+            <div class="arrow">→</div>
+            <div class="react-step">Observe<br /><span>ملاحظة</span></div>
+            <div class="arrow">→</div>
+            <div class="react-step">Decide<br /><span>قرار</span></div>
+          </div>
+          <p>
+            تتيح هذه الحلقة إمكانية تنفيذ عدة خطوات متتابعة والتأكد من صحة النتائج قبل الانتقال، مما يوفر مرونة عالية في معالجة المهام المعقدة.
+          </p>
+          <canvas id="reactChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-react-1">[2]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 3: Operations Agent -->
+      <section class="slide" id="slide-3" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>وكيل العمليات</h2>
+          <p>
+            يهتم هذا الوكيل بتأكيد الحجوزات، التنسيق مع الموردين، تعيين المرشدين، إدارة الشكاوى، ومراقبة الرحلات في الوقت الحقيقي.
+          </p>
+          <ul>
+            <li>تأكيد الحجوزات وإرسال القسائم</li>
+            <li>التواصل مع الموردين وتعيين المرشدين</li>
+            <li>تصنيف الشكاوى واقتراح حلول</li>
+            <li>مراقبة الرحلات وإرسال التنبيهات</li>
+          </ul>
+          <canvas id="operationsChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-ops-1">[3]</a></sup>
+            <sup><a href="#cite-ops-2">[4]</a></sup>
+            <sup><a href="#cite-ops-3">[5]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 3a: Operations Implementation -->
+      <section class="slide" id="slide-3a" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>تنفيذ وكيل العمليات ودورة الطلب</h2>
+          <p>
+            لتنفيذ وكيل العمليات في إطار <code>Django</code> مع نموذج <code>OpenAI</code> يمكن تعريف كل أداة كدالة Python مسجلة من خلال 
+            <code>@method_tool</code>. يستخدم الوكيل حلقة ReAct ليحدد الترتيب الصحيح للأدوات طبقاً للسياق.
+          </p>
+          <pre><code># تعريف أدوات وكيل العمليات (مختصرة)
+@method_tool def verify_booking(booking_id: int) -> bool: ...
+@method_tool def get_supplier_contract(supplier_id: int) -> dict: ...
+@method_tool def generate_voucher(booking_id: int) -> str: ...
+@method_tool def assign_guide(booking_id: int) -> dict: ...</code></pre>
+          <pre><code># إنشاء وكيل ReAct وتنفيذ دورة تأكيد الحجز
+ops_agent = create_react_agent(
+    tools=[verify_booking, get_supplier_contract, generate_voucher, assign_guide],
+    llm=openai_model
+)
+response = ops_agent("الرجاء تأكيد الحجز رقم 123 وتعيين مرشد")
+print(response)</code></pre>
+          <p>عند استقبال طلب تأكيد الحجز، يمر الوكيل بالمراحل التالية:</p>
+          <ul>
+            <li>تحديد الحدث: استقبال حجز جديد أو تحديث الحجز، أو استلام شكوى.</li>
+            <li>جمع المعلومات: تحميل تفاصيل الحجز، مراجعة عقود الموردين، التحقق من السداد، وتحميل قائمة المرشدين المتاحين.</li>
+            <li>التخطيط: اختيار الأدوات المناسبة (مثل <code>verify_booking</code>، <code>get_supplier_contract</code>، <code>assign_guide</code>) ووضع تسلسل التنفيذ.</li>
+            <li>التنفيذ: استدعاء الأدوات واحدة تلو الأخرى؛ التحقق من الحجز ثم جلب العقد ثم توليد القسيمة وتعيين مرشد؛ التعامل مع الشكاوى بتصنيفها واقتراح الحلول.</li>
+            <li>التحقق: استخدام بوابة تأكيد لفحص نتائج كل أداة وضمان صحة البيانات؛ إذا حدث خطأ، يتم التصعيد للموظف البشري.</li>
+            <li>الإنهاء: تحديث الحجز في قاعدة البيانات، إرسال القسائم والإشعارات للعميل والمورد، وتوثيق العملية في السجلات.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-opsx-1">[33]</a></sup>
+            <sup><a href="#cite-opsx-2">[34]</a></sup>
+            <sup><a href="#cite-opsx-3">[35]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 4: Finance Agent -->
+      <section class="slide" id="slide-4" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>وكيل المالية</h2>
+          <p>
+            مسؤول عن إصدار الفواتير، تتبع الدفعات والعمولات، مطابقة الحوالات البنكية، كشف الاحتيال، وتوقع التدفقات النقدية.
+          </p>
+          <ul>
+            <li>إصدار الفواتير وحساب العمولات</li>
+            <li>مطابقة الدفعات ومكافحة الاحتيال</li>
+            <li>التسوية البنكية والتقارير المالية</li>
+            <li>توقع التدفقات النقدية المستقبلية</li>
+          </ul>
+          <canvas id="financeChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-fin-1">[6]</a></sup>
+            <sup><a href="#cite-fin-2">[7]</a></sup>
+            <sup><a href="#cite-fin-3">[8]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 4a: Finance Implementation -->
+      <section class="slide" id="slide-4a" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>تنفيذ وكيل المالية ودورة الطلب</h2>
+          <p>
+            يختص وكيل المالية بإصدار الفواتير، حساب العمولات، مطابقة الدفعات وكشف الاحتيال. يمكن تعريف هذه الوظائف كأدوات مستقلة ثم ربطها بوكيل ReAct.
+          </p>
+          <pre><code># أدوات وكيل المالية
+@method_tool
+def generate_invoice(booking_id: int) -> dict:
+    """يولد فاتورة مفصلة للعميل والمورد."""
+    return {"invoice_id": "INV-0456", "amount": 1500.0}
+
+@method_tool
+def calc_commission(booking_id: int) -> float:
+    """يحسب عمولة الشركة من الحجز."""
+    return 75.0
+
+@method_tool
+def match_payment(invoice_id: str, transaction_id: str) -> bool:
+    """يطابق دفعة البنك مع الفاتورة."""
+    return True
+
+@method_tool
+def detect_fraud_signals(booking_id: int) -> bool:
+    """يراقب إشارات الاحتيال على الحجز."""
+    return False</code></pre>
+          <pre><code># إنشاء الوكيل وتنفيذ الطلب المالي
+finance_agent = create_react_agent(
+    tools=[generate_invoice, calc_commission, match_payment, detect_fraud_signals],
+    llm=openai_model
+)
+result = finance_agent("أصدر فاتورة للحجز 123 وتابع الدفعات والاحتيال")
+print(result)</code></pre>
+          <p>تتبع دورة الطلب المالي المراحل التالية:</p>
+          <ul>
+            <li>تحديد الحدث: إنشاء حجز جديد، إصدار فاتورة دورية، أو وصول دفعة من البنك.</li>
+            <li>جمع البيانات: استرجاع المعلومات المالية للحجز، أسعار العمولات، وضبط الحالة الحالية للفاتورة.</li>
+            <li>التخطيط: اختيار الوظائف الملائمة (<code>generate_invoice</code>، <code>calc_commission</code>، <code>detect_fraud_signals</code>، <code>match_payment</code>) وتحديد التسلسل.</li>
+            <li>التنفيذ: توليد الفاتورة، حساب عمولة الشركة، إرسال الفاتورة، ثم مطابقة الدفعات؛ تشغيل كاشف الاحتيال لمراقبة أي نشاط مشبوه.</li>
+            <li>التحقق: التحقق من تطابق المبلغ في الفاتورة مع المبلغ المسدد، ضمان عدم وجود إشارات احتيال؛ تحويل الحالات غير الطبيعية للمراجعة البشرية.</li>
+            <li>الإتمام: تحديث الحسابات في دفتر الأستاذ، إرسال إشعار للدفع للعملاء والموردين، وإعداد تقارير للأداء والتدفقات النقدية المستقبلية.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-finex-1">[36]</a></sup>
+            <sup><a href="#cite-finex-2">[37]</a></sup>
+            <sup><a href="#cite-finex-3">[38]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 5: Pricing Agent -->
+      <section class="slide" id="slide-5" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>وكيل التسعير</h2>
+          <p>
+            يتابع الطلب وسرعة الحجوزات ويجمع أسعار المنافسين، ثم يحسب السعر الأمثل عبر نموذج ديناميكي يوازن الربحية والتنافسية.
+          </p>
+          <ul>
+            <li>متابعة الطلب وسرعة الحجوزات</li>
+            <li>مقارنة الأسعار مع المنافسين</li>
+            <li>حساب السعر الأمثل والتحقق من هامش الربح</li>
+            <li>تطبيق الأسعار الجديدة وتتبع الأداء</li>
+          </ul>
+          <canvas id="pricingChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-price-1">[9]</a></sup>
+            <sup><a href="#cite-price-2">[10]</a></sup>
+            <sup><a href="#cite-price-3">[11]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 5a: Pricing Implementation -->
+      <section class="slide" id="slide-5a" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>تنفيذ وكيل التسعير ودورة الطلب</h2>
+          <p>
+            يعتمد وكيل التسعير على مراقبة الطلب وسرعة الحجوزات وأسعار المنافسين لتوليد أسعار ديناميكية. تُعرّف الأدوات للحصول على المؤشرات وحساب السعر الأمثل ومراجعة الهامش ثم تنفيذ التحديث.
+          </p>
+          <pre><code># أدوات التسعير
+@method_tool
+def get_departure_metrics(departure_id: int) -> dict:
+    """يجمع معدل الحجز والأيام المتبقية."""
+    return {"booking_pace": 0.8, "days_left": 30}
+
+@method_tool
+def get_competitor_prices(departure_id: int) -> list:
+    """يسترجع أسعار المنافسين لنفس الرحلة."""
+    return [1150.0, 1200.0, 1180.0]
+
+@method_tool
+def calculate_optimal_price(departure_id: int) -> float:
+    """يحسب السعر الأمثل باستخدام نموذج ديناميكي."""
+    # يستخدم pace & days_left للتسعير
+    return 1199.0
+
+@method_tool
+def check_margin_floor(price: float) -> bool:
+    """يتحقق من عدم كسر هامش الربح الأدنى."""
+    return price >= 1100.0
+
+@method_tool
+def apply_price_update(departure_id: int, new_price: float) -> str:
+    """يطبق السعر الجديد على النظام."""
+    return "price updated"</code></pre>
+          <pre><code># إنشاء وكيل التسعير
+pricing_agent = create_react_agent(
+    tools=[get_departure_metrics, get_competitor_prices, calculate_optimal_price, check_margin_floor, apply_price_update],
+    llm=openai_model
+)
+result = pricing_agent("حدّث أسعار رحلة رقم 567 إذا استدعى الأمر")
+print(result)</code></pre>
+          <p>تتبع دورة تحديث التسعير الخطوات التالية:</p>
+          <ul>
+            <li>الحدث: انخفاض أو زيادة في سرعة الحجوزات أو تغير الأسعار لدى المنافسين.</li>
+            <li>جمع المؤشرات: باستخدام <code>get_departure_metrics</code> لجمع عدد الحجوزات والأيام المتبقية، و <code>get_competitor_prices</code> لجمع أسعار المنافسين.</li>
+            <li>التخطيط: تمرير المؤشرات لنموذج التسعير لتوليد السعر الأمثل عبر <code>calculate_optimal_price</code>، ثم تحديد هامش الربح الأدنى باستخدام <code>check_margin_floor</code>.</li>
+            <li>التنفيذ: إذا كان السعر آمن، تطبيقه بواسطة <code>apply_price_update</code>؛ وعند الحاجة، إنشاء حملة تسويقية أو تعديل خطة التسعير.</li>
+            <li>المراقبة: متابعة الأداء بعد التغيير، وتتبع أثر الأسعار على معدل الحجز؛ تشغيل نموذج التنبؤ لتحديث المعلمات باستمرار.</li>
+            <li>التحقق: الحصول على موافقة بشرية قبل أي تخفيض كبير لضمان الامتثال للسياسات.</li>
+            <li>التوثيق: تسجيل جميع التغييرات وإعلام الأقسام الأخرى (المخزون والمالية) عبر النظام الحدثي.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-pricex-1">[39]</a></sup>
+            <sup><a href="#cite-pricex-2">[40]</a></sup>
+            <sup><a href="#cite-pricex-3">[41]</a></sup>
+            <sup><a href="#cite-pricex-4">[42]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 6: Inventory Agent -->
+      <section class="slide" id="slide-6" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>وكيل المخزون</h2>
+          <p>
+            يضمن توافر المقاعد والغرف عبر جميع الموردين والقنوات، ويمنع الإفراط في البيع، ويعيد موازنة الأرصدة، كما يوقف البيع أو يعيد فتحه حسب الحاجة.
+          </p>
+          <ul>
+            <li>مزامنة المخزون وإعادة موازنة التخصيص</li>
+            <li>منع الإفراط في البيع وإدارة وقف/إعادة البيع</li>
+            <li>تحرير التخصيص وتوقع معدل الامتلاء</li>
+            <li>رصد المنتجات بطيئة البيع</li>
+          </ul>
+          <canvas id="inventoryChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-inv-1">[12]</a></sup>
+            <sup><a href="#cite-inv-2">[13]</a></sup>
+            <sup><a href="#cite-inv-3">[14]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 6a: Inventory Implementation -->
+      <section class="slide" id="slide-6a" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>تنفيذ وكيل المخزون ودورة الطلب</h2>
+          <p>
+            يضمن وكيل المخزون صحة المخزون عبر الموردين والقنوات، ويعيد موازنة الأرصدة ويمنع الإفراط في البيع. تُعرّف الأدوات لجلب التوفر وتحديثه وإعادة توزيع الحصص وإدارة الوقف/الإعادة.
+          </p>
+          <pre><code># أدوات المخزون
+@method_tool
+def get_live_inventory(product_id: int) -> dict:
+    """يسترجع التوفر الحالي لكل قناة ومورد."""
+    return {"supplier_a": 20, "supplier_b": 10}
+
+@method_tool
+def update_inventory(product_id: int, channel: str, delta: int) -> None:
+    """يحدث الكمية المتاحة في القناة المحددة."""
+    pass
+
+@method_tool
+def rebalance_channel_inventory(product_id: int) -> None:
+    """يعيد موازنة الكميات بين القنوات للسماح بالمبيعات المثلى."""
+    pass
+
+@method_tool
+def trigger_stop_sale(product_id: int) -> None:
+    """يوقف بيع منتج عند نفاد المخزون."""
+    pass</code></pre>
+          <pre><code># إنشاء وكيل المخزون
+inventory_agent = create_react_agent(
+    tools=[get_live_inventory, update_inventory, rebalance_channel_inventory, trigger_stop_sale],
+    llm=openai_model
+)
+response = inventory_agent("تأكد من توافر مقاعد الرحلة 789 وقم بإعادة توزيع المخزون إذا لزم")
+print(response)</code></pre>
+          <p>تعمل دورة طلب المخزون كالتالي:</p>
+          <ul>
+            <li>الحدث: حجز جديد، إلغاء، تحديث سعر يؤثر على الطلب، أو اقتراب نفاد المخزون.</li>
+            <li>جمع التوفر: استعمال <code>get_live_inventory</code> لجمع التوفر الحالي عبر الموردين والقنوات.</li>
+            <li>التخطيط: تحليل مستويات المخزون وتحديد الحاجة لإعادة توزيع الحصص بين القنوات أو الموردين؛ اتخاذ قرار بإيقاف أو إعادة فتح المبيعات.</li>
+            <li>التنفيذ: استخدام <code>update_inventory</code> لإجراء التعديلات، و <code>rebalance_channel_inventory</code> لإعادة توزيع التخصيصات؛ في حال نفاد منتج، تشغيل <code>trigger_stop_sale</code> أو release_allotment.</li>
+            <li>التحقق: مراقبة النتائج للتأكد من أن المخزون لا يزال صحيحاً وعدم حدوث إفراط في البيع أو فقدان للفرص.</li>
+            <li>الإتمام: إرسال تحديثات للموردين والوكالات، وتخزين التاريخ للتنبؤ بمعدلات الامتلاء عبر <code>forecast_fill_rate</code> أو <code>detect_slow_sellers</code>.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-invex-1">[43]</a></sup>
+            <sup><a href="#cite-invex-2">[44]</a></sup>
+            <sup><a href="#cite-invex-3">[45]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 7: Recommendation Agent -->
+      <section class="slide" id="slide-7" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>وكيل التوصيات</h2>
+          <p>
+            يقدم توصيات شخصية للعملاء استنادًا إلى سجلهم وسلوكهم، ويستخدم آليات تصفية وتصفية تعاونية لتصنيف الخيارات.
+          </p>
+          <ul>
+            <li>إعداد الملف الشخصي والبحث عن منتجات مشابهة</li>
+            <li>توليد توصيات مخصصة وترتيبها</li>
+            <li>تصفية حسب التوفر والربحية</li>
+            <li>تقديم التوصيات وتتبع التفاعل</li>
+          </ul>
+          <canvas id="recommendationChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-rec-1">[15]</a></sup>
+            <sup><a href="#cite-rec-2">[16]</a></sup>
+            <sup><a href="#cite-rec-3">[17]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 7a: Recommendation Implementation -->
+      <section class="slide" id="slide-7a" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>تنفيذ وكيل التوصيات ودورة الطلب</h2>
+          <p>
+            يهدف وكيل التوصيات إلى زيادة المبيعات عبر اقتراح منتجات إضافية أو ترقية الرحلات. يتم ذلك من خلال تحليل الملف الشخصي، البحث عن منتجات مشابهة، تصنيف النتائج، ثم عرض أفضل الاقتراحات.
+          </p>
+          <pre><code># أدوات التوصيات
+@method_tool
+def get_customer_profile(customer_id: int) -> dict:
+    """يحصل على بيانات العميل وسلوكياته السابقة."""
+    return {"segment": "VIP", "past_bookings": ["rome", "paris"]}
+
+@method_tool
+def search_similar_products(query: str) -> list:
+    """يبحث عن منتجات أو أنشطة مشابهة للرحلة الحالية."""
+    return ["جولة في المتحف", "تذكرة مسرح", "تجربة تذوق الطعام"]
+
+@method_tool
+def rank_recommendations(products: list, customer_profile: dict) -> list:
+    """يرتب المنتجات وفقاً لاحتمال اختيار العميل لها."""
+    return sorted(products)
+
+@method_tool
+def check_upsell_eligibility(customer_id: int, product: str) -> bool:
+    """يتحقق من أهلية العميل للترقية أو العرض."""
+    return True</code></pre>
+          <pre><code># إنشاء وكيل التوصيات
+rec_agent = create_react_agent(
+    tools=[get_customer_profile, search_similar_products, rank_recommendations, check_upsell_eligibility],
+    llm=openai_model
+)
+output = rec_agent("اقترح أنشطة إضافية للحجز الحالي للعميل 42")
+print(output)</code></pre>
+          <p>دورة التوصية تمر بالخطوات الآتية:</p>
+          <ul>
+            <li>الحدث: عند الانتهاء من الحجز، أو عند طلب العميل اقتراحات إضافية.</li>
+            <li>جمع البيانات: تحميل الملف الشخصي للعميل، تاريخه وسلوكياته السابقة عبر <code>get_customer_profile</code>.</li>
+            <li>البحث: البحث عن أنشطة ومنتجات مشابهة باستخدام <code>search_similar_products</code>، وحصر تلك المتاحة عبر <code>get_available_excursions</code>.</li>
+            <li>التنظيم: ترتيب النتائج باستخدام <code>rank_recommendations</code> بناءً على احتمالية اختيار العميل، ثم التحقق من الأهلية للعرض عبر <code>check_upsell_eligibility</code>.</li>
+            <li>التقديم: عرض الاقتراحات في واجهة المستخدم، وجمع التفاعل (clicks, selections) من خلال <code>track_recommendation_click</code>.</li>
+            <li>التعلم: تحديث نماذج التفضيلات بناءً على التفاعل لتحسين الاقتراحات المستقبلية، باستخدام <code>update_preference_model</code>.</li>
+            <li>التحقق: التأكد من توافر العناصر المقترحة وتناسقها مع سياسة التسعير والربحية، وإلا يتم تعديل القائمة.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-recex-1">[46]</a></sup>
+            <sup><a href="#cite-recex-2">[47]</a></sup>
+            <sup><a href="#cite-recex-3">[48]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 8: Reservation Agent -->
+      <section class="slide" id="slide-8" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>وكيل الحجوزات</h2>
+          <p>
+            يدير دورة حياة الحجز بالكامل، بما في ذلك إنشاء الحجوزات، تعديلها أو إلغاؤها، والتأكد من توفر المقاعد وسريان السياسات، وحساب التكاليف والرسوم.
+          </p>
+          <ul>
+            <li>استقبال الطلبات وجمع السياق</li>
+            <li>التحقق من التوفر والأسعار والقواعد</li>
+            <li>حساب الغرامات والتكاليف</li>
+            <li>إنشاء/تعديل/إلغاء الحجز وإصدار الوثائق</li>
+          </ul>
+          <canvas id="reservationChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-res-1">[18]</a></sup>
+            <sup><a href="#cite-res-2">[19]</a></sup>
+            <sup><a href="#cite-res-3">[20]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 8a: Reservation Implementation -->
+      <section class="slide" id="slide-8a" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>تنفيذ وكيل الحجوزات ودورة الطلب</h2>
+          <p>
+            يتولى وكيل الحجوزات إدارة دورة حياة الحجز بالكامل، بما في ذلك إنشاء الحجز وتعديله أو إلغائه وفقاً للتوفر والسياسات. تُعرّف الأدوات للتحقق من التوفر وحساب التكلفة وتنفيذ الإجراءات.
+          </p>
+          <pre><code># أدوات الحجوزات
+@method_tool
+def check_availability(product_id: int, date: str) -> bool:
+    """يتحقق من توفر مقعد أو غرفة في التاريخ المحدد."""
+    return True
+
+@method_tool
+def calculate_booking_price(product_id: int, date: str) -> float:
+    """يحسب السعر الإجمالي للحجز بما في ذلك الرسوم والضرائب."""
+    return 1450.0
+
+@method_tool
+def create_booking(customer_id: int, product_id: int, date: str) -> dict:
+    """ينشئ الحجز في النظام."""
+    return {"booking_id": 789, "status": "confirmed"}
+
+@method_tool
+def modify_booking(booking_id: int, new_date: str) -> dict:
+    """يعدّل الحجز القائم."""
+    return {"booking_id": booking_id, "new_date": new_date}
+
+@method_tool
+def cancel_booking(booking_id: int) -> dict:
+    """يلغي الحجز ويعيد الرسوم حسب السياسة."""
+    return {"booking_id": booking_id, "cancelled": True}</code></pre>
+          <pre><code># وكيل الحجوزات
+reservation_agent = create_react_agent(
+    tools=[check_availability, calculate_booking_price, create_booking, modify_booking, cancel_booking],
+    llm=openai_model
+)
+resp = reservation_agent("احجز رحلة للعميل 42 بتاريخ 2026-05-10")
+print(resp)</code></pre>
+          <p>يعمل الوكيل وفق دورة واضحة:</p>
+          <ul>
+            <li>الحدث: طلب من العميل لإنشاء، تعديل، أو إلغاء حجز.</li>
+            <li>جمع السياق: استعمال <code>check_availability</code> للتأكد من التوفر في التاريخ المطلوب، وجمع السياسات والشروط المطبقة.</li>
+            <li>التخطيط: تحديد ما إذا كان الطلب إنشاء حجز جديد أو تعديل أو إلغاء، وحساب التكلفة أو الرسوم بواسطة <code>calculate_booking_price</code> أو <code>calculate_modification_cost</code> أو <code>calculate_cancellation_penalty</code>.</li>
+            <li>التنفيذ: استخدام <code>create_booking</code> لتأكيد الحجز، أو <code>modify_booking</code> لتعديل التاريخ، أو <code>cancel_booking</code> لإلغاء الحجز، ومعالجة المعاملات المالية المرتبطة.</li>
+            <li>التحقق: التأكد من تنفيذ العملية بنجاح، ومراجعة الأسعار والخصومات مع النظام المالي.</li>
+            <li>الإتمام: توليد الوثائق والفواتير عبر <code>generate_booking_documents</code>، إرسال الإشعارات للعملاء والموردين، وتحديث المخزون.</li>
+            <li>التوثيق: حفظ سجل العملية في قاعدة البيانات ومزامنته مع الأنظمة الأخرى عبر أحداث Kafka.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-resex-1">[49]</a></sup>
+            <sup><a href="#cite-resex-2">[50]</a></sup>
+            <sup><a href="#cite-resex-3">[51]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 9: Relocation Agent -->
+      <section class="slide" id="slide-9" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>وكيل إعادة التسكين</h2>
+          <p>
+            يتعامل مع الطوارئ مثل إلغاء الرحلات أو إغلاق الفنادق أو الكوارث الطبيعية من خلال العثور على خيارات بديلة تقلل الخسائر وتضمن رضا العملاء.
+          </p>
+          <ul>
+            <li>تحديد الحجوزات المتضررة وتقييم الأثر</li>
+            <li>البحث عن البدائل وتقييمها</li>
+            <li>تنفيذ إعادة الحجز الجماعي وتعويض العملاء</li>
+            <li>التواصل وإصدار تقارير الحوادث</li>
+          </ul>
+          <canvas id="relocationChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-reloc-1">[21]</a></sup>
+            <sup><a href="#cite-reloc-2">[22]</a></sup>
+            <sup><a href="#cite-reloc-3">[23]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 9a: Relocation Implementation -->
+      <section class="slide" id="slide-9a" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>تنفيذ وكيل إعادة التسكين ودورة الطلب</h2>
+          <p>
+            يتعامل وكيل إعادة التسكين مع الحالات الطارئة مثل إلغاء الرحلات أو الكوارث الطبيعية، ويبحث عن بدائل ملائمة بسرعة. تُعرّف الأدوات لتحديد الحجوزات المتأثرة والبحث عن البدائل وتقييمها ثم تنفيذ إعادة الحجز وتعويض العملاء.
+          </p>
+          <pre><code># أدوات إعادة التسكين
+@method_tool
+def get_affected_bookings(event_id: str) -> list:
+    """يحدد الحجوزات المتأثرة بالحدث الطارئ."""
+    return [321, 322, 323]
+
+@method_tool
+def search_alternatives(original_booking_id: int) -> list:
+    """يبحث عن خيارات بديلة للحجز المتضرر."""
+    return ["فندق بديل", "رحلة أخرى", "استرداد نقدي"]
+
+@method_tool
+def evaluate_alternative(alternative: str) -> float:
+    """يقيّم تكلفة وملائمة البديل."""
+    return 0.8
+
+@method_tool
+def execute_mass_rebooking(bookings: list, alternative: str) -> None:
+    """يعيد الحجز لمجموعة من العملاء على البديل المختار."""
+    pass</code></pre>
+          <pre><code># إنشاء وكيل إعادة التسكين
+relocation_agent = create_react_agent(
+    tools=[get_affected_bookings, search_alternatives, evaluate_alternative, execute_mass_rebooking],
+    llm=openai_model
+)
+out = relocation_agent("حدث إلغاء رحلة رقم 500، اعثر على بدائل مناسبة")
+print(out)</code></pre>
+          <p>تمر دورة إعادة التسكين بالمراحل الآتية:</p>
+          <ul>
+            <li>الحدث: وقوع حالة طارئة مثل إلغاء رحلة، انهيار فندق أو كارثة طبيعية.</li>
+            <li>جمع البيانات: تحديد جميع الحجوزات المتأثرة عبر <code>get_affected_bookings</code>، وجمع المعلومات عن الموارد البديلة المتاحة.</li>
+            <li>التقييم: البحث عن بدائل عبر <code>search_alternatives</code> وتقييمها عبر <code>evaluate_alternative</code> بناءً على التكلفة والراحة والوقت.</li>
+            <li>التخطيط: تحديد الخيار الأنسب (فندق بديل، رحلة جديدة أو تعويض)، ووضع خطة تنفيذ جماعية للحجز.</li>
+            <li>التنفيذ: إعادة الحجز للمتضررين باستخدام <code>execute_mass_rebooking</code>، وتحديد التعويضات عبر calculate_compensation.</li>
+            <li>التواصل: إرسال الإشعارات للعملاء بالمستجدات وتعليمات الطوارئ عبر <code>send_emergency_notification</code>، وإبلاغ الموردين.</li>
+            <li>التوثيق: إعداد تقرير الحادث، حفظ البيانات، وتقديم claims للموردين المتسببين عبر <code>file_supplier_claim</code>.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-relocx-1">[52]</a></sup>
+            <sup><a href="#cite-relocx-2">[53]</a></sup>
+            <sup><a href="#cite-relocx-3">[54]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 10: Replan Agent -->
+      <section class="slide" id="slide-10" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>وكيل إعادة التخطيط</h2>
+          <p>
+            يعيد هيكلة مسار الرحلة عندما تتغير الظروف، مع المحافظة على التجربة وتقليل التعقيد. يقوم بتحليل التأثير، البحث عن بدائل الأنشطة والفنادق، وتوليد مخطط جديد.
+          </p>
+          <ul>
+            <li>استدعاء كامل خط سير الرحلة وتحليل التعارضات</li>
+            <li>البحث عن بدائل الأنشطة والفنادق</li>
+            <li>إنشاء مسار جديد وحساب التكلفة</li>
+            <li>الحصول على موافقة العميل وتنفيذ التعديلات</li>
+          </ul>
+          <canvas id="replanChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-replan-1">[24]</a></sup>
+            <sup><a href="#cite-replan-2">[25]</a></sup>
+            <sup><a href="#cite-replan-3">[26]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 10a: Replan Implementation -->
+      <section class="slide" id="slide-10a" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>تنفيذ وكيل إعادة التخطيط ودورة الطلب</h2>
+          <p>
+            وكيل إعادة التخطيط مسؤول عن تعديل خط سير الرحلة عندما تتغير الظروف (تأخير رحلة، طلب العميل، إلغاء نشاط). تُعرّف الأدوات لجلب المسار الكامل، اكتشاف التعارضات، البحث عن البدائل، وتوليد مسار جديد.
+          </p>
+          <pre><code># أدوات إعادة التخطيط
+@method_tool
+def get_full_itinerary(booking_id: int) -> dict:
+    """يجلب خط سير الرحلة بالكامل بما في ذلك الأنشطة والفنادق."""
+    return {"itinerary": ["hotel A","tour B","flight C"]}
+
+@method_tool
+def detect_itinerary_conflicts(itinerary: dict) -> list:
+    """يكتشف التعارضات مثل التوقيت أو الفجوات."""
+    return ["tour B و flight C overlap"]
+
+@method_tool
+def search_activity_alternatives(activity: str) -> list:
+    """يجد أنشطة بديلة قابلة للحجز."""
+    return ["tour D","tour E"]
+
+@method_tool
+def generate_revised_itinerary(original: dict, updates: dict) -> dict:
+    """ينشئ مساراً معدلاً يتضمن البدائل المحددة."""
+    return {"itinerary": ["hotel A","tour D","flight C"]}</code></pre>
+          <pre><code># وكيل إعادة التخطيط
+replan_agent = create_react_agent(
+    tools=[get_full_itinerary, detect_itinerary_conflicts, search_activity_alternatives, generate_revised_itinerary],
+    llm=openai_model
+)
+reply = replan_agent("أعد تخطيط الرحلة للحجز 789 بسبب إلغاء نشاط")
+print(reply)</code></pre>
+          <p>المراحل الرئيسية في دورة إعادة التخطيط:</p>
+          <ul>
+            <li>الحدث: تغير في خط سير الرحلة بسبب تأخير أو طلب العميل أو إلغاء نشاط.</li>
+            <li>جمع السياق: تحميل المسار الحالي وكافة العناصر المرتبطة باستخدام <code>get_full_itinerary</code>، وجمع شروط الفنادق والأنشطة.</li>
+            <li>تحليل التعارضات: تحديد المشاكل في التوقيت أو التداخلات باستخدام <code>detect_itinerary_conflicts</code>.</li>
+            <li>البحث عن البدائل: البحث عن بدائل للأنشطة أو الفنادق عبر <code>search_activity_alternatives</code> و check_hotel_flexibility.</li>
+            <li>التوليد: إنشاء مسار معدل يشمل التعديلات عبر <code>generate_revised_itinerary</code> أو update_all_bookings، وتقدير التكلفة الجديدة عبر <code>recalculate_trip_cost</code>.</li>
+            <li>الموافقة: إرسال المسار المقترح للعميل والحصول على الموافقة قبل التنفيذ.</li>
+            <li>التنفيذ: تطبيق التعديلات على النظام، إرسال الوثائق الجديدة عبر <code>send_revised_documents</code>، وتحديث السجلات.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-replanx-1">[55]</a></sup>
+            <sup><a href="#cite-replanx-2">[56]</a></sup>
+            <sup><a href="#cite-replanx-3">[57]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 11: AI Copilot -->
+      <section class="slide" id="slide-11" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>المساعد الذكي</h2>
+          <p>
+            يقدم طبقة ذكاء موحدة للإدارة، تجيب على الاستفسارات، تراقب مؤشرات الأداء، تكتشف الشذوذات والفرص، وتنسق العمل بين الوكلاء.
+          </p>
+          <ul>
+            <li>جمع وتحليل الأسئلة وتوجيهها للوكلاء المناسبين</li>
+            <li>جمع وإجمال نتائج الوكلاء وتقديم تقارير يومية</li>
+            <li>كشف الفرص والشذوذات وتشغيل نماذج السيناريوهات</li>
+            <li>التنسيق بين الوكلاء وتنفيذ الإجراءات بعد الموافقة</li>
+          </ul>
+          <canvas id="copilotChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-copilot-1">[27]</a></sup>
+            <sup><a href="#cite-copilot-2">[28]</a></sup>
+            <sup><a href="#cite-copilot-3">[29]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 11a: AI Copilot Implementation -->
+      <section class="slide" id="slide-11a" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>تنفيذ المساعد الذكي ودورة الطلب</h2>
+          <p>
+            يعمل المساعد الذكي كطبقة موحدة للإدارة، يجمع الأسئلة ويوجهها للوكلاء المناسبين، يجمع النتائج ويقدم التقارير، ويكتشف الفرص والشذوذات. تُعرّف الأدوات لسؤال جميع الوكلاء، الحصول على لوحة المؤشرات، اكتشاف الشذوذات وتنسيق الإجراءات.
+          </p>
+          <pre><code># أدوات المساعد الذكي
+@method_tool
+def query_all_agents(query: str) -> dict:
+    """يرسل الاستفسار لجميع الوكلاء ويجمع الردود."""
+    return {"operations": "...", "finance": "..."}
+
+@method_tool
+def get_kpi_dashboard() -> dict:
+    """يستخرج مؤشرات الأداء الرئيسية للمنصة."""
+    return {"bookings": 1200, "revenue": 45000}
+
+@method_tool
+def detect_anomalies() -> list:
+    """يكتشف الشذوذات في البيانات."""
+    return ["انخفاض في الحجوزات على وجهة معينة"]
+
+@method_tool
+def coordinate_cross_agent_action(actions: dict) -> None:
+    """ينسق تنفيذ إجراءات بين الوكلاء بعد الحصول على الموافقة."""
+    pass</code></pre>
+          <pre><code># إنشاء المساعد الذكي
+copilot_agent = create_react_agent(
+    tools=[query_all_agents, get_kpi_dashboard, detect_anomalies, coordinate_cross_agent_action],
+    llm=openai_model
+)
+summary = copilot_agent("قدّم تقريراً يومياً عن الأداء مع كشف أي شذوذات")
+print(summary)</code></pre>
+          <p>دورة طلب المساعد الذكي تتضمن:</p>
+          <ul>
+            <li>الحدث: طلب إدارة للحصول على ملخص، اكتشاف شذوذات، أو تنسيق مهمة عبر الوكلاء.</li>
+            <li>التحليل: فهم السؤال أو المهمة، وتحديد الوكلاء المطلوب استدعاؤهم (العمليات، المالية، التسعير، إلخ).</li>
+            <li>جمع البيانات: جمع بيانات من جميع الوكلاء عبر <code>query_all_agents</code>، واسترجاع لوحات المؤشرات الرئيسية عبر <code>get_kpi_dashboard</code>.</li>
+            <li>كشف الشذوذات والفرص: استخدام <code>detect_anomalies</code> و identify_opportunities لرصد الأنماط غير الطبيعية أو فرص تحسين.</li>
+            <li>تشغيل سيناريوهات: استخدام <code>run_scenario_model</code> لمحاكاة أثر القرارات المحتملة على الأداء.</li>
+            <li>التنسيق: إذا كانت النتيجة تتطلب إجراءات، تنفيذها عبر <code>coordinate_cross_agent_action</code> بموافقة الإدارة.</li>
+            <li>التلخيص: بناء تقرير يومي أو موجز شامل باستخدام generate_daily_briefing، ومشاركته مع الإدارة مع توصيات قابلة للتنفيذ.</li>
+          </ul>
+          <div class="footnotes">
+            <sup><a href="#cite-copilotx-1">[58]</a></sup>
+            <sup><a href="#cite-copilotx-2">[59]</a></sup>
+            <sup><a href="#cite-copilotx-3">[60]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 12: Multi-Agent Orchestration -->
+      <section class="slide" id="slide-12" data-bg="assets/slide_bg1.png">
+        <div class="content">
+          <h2>تنسيق الوكلاء المتعددين</h2>
+          <p>
+            يعتمد النظام على هيئة رسائل (Kafka) وواجهة برمجية موحدة لربط الوكلاء ضمن منظومة واحدة. الأحداث الناتجة عن وكيل واحد (مثل تغيير السعر) يتم نشرها تلقائياً ليقوم وكلاء آخرون بتحديث بياناتهم أو اتخاذ إجراءات.
+          </p>
+          <ul>
+            <li>بنية ميكرو-خدمات مع واجهة برمجية موحدة</li>
+            <li>رسائل أحداث عبر Kafka لتنبيه الوكلاء</li>
+            <li>تنسيق وتناغم بين الوكلاء</li>
+            <li>مثال: تحديث الأسعار يطلق تحديثاً للمخزون والمالية</li>
+          </ul>
+          <canvas id="multiChart" width="500" height="250"></canvas>
+          <div class="footnotes">
+            <sup><a href="#cite-multi-1">[30]</a></sup>
+            <sup><a href="#cite-multi-2">[31]</a></sup>
+          </div>
+        </div>
+      </section>
+      <!-- Slide 13: Conclusion -->
+      <section class="slide" id="slide-13" data-bg="assets/slide_bg2.png">
+        <div class="content">
+          <h2>الخلاصة والخطوات التالية</h2>
+          <p>
+            يوفر هذا النظام منظومة متكاملة لوكلاء الذكاء الاصطناعي تعمل بطريقة ديناميكية وتتواصل فيما بينها لتحقيق أعلى مستويات الكفاءة والجودة في خدمات السفر. الاستفادة من حلقة ReAct، والتأكيدات البشرية، وتقنيات الذكاء الاصطناعي الحديثة مثل نماذج اللغة الكبيرة يساعد في ضمان الدقة وتحسين تجربة العملاء.
+          </p>
+          <p>
+            الخطوة التالية هي تطبيق هذه المفاهيم عملياً في إطار عمل مثل Django بالاستفادة من مكتبات مثل
+            <code>LangGraph</code> لتعريف الأدوات وربطها بـ OpenAI، ووضع بوابات التحقق لضمان صحة النتائج قبل التنفيذ.
+          </p>
+          <div class="footnotes">
+            <sup><a href="#cite-concl-1">[32]</a></sup>
+          </div>
+        </div>
+      </section>
+    </div>
+    <!-- Citations Section (hidden) -->
+    <div class="citations">
+      <!-- The citations are listed here with corresponding anchors. -->
+      <p id="cite-agenda-1">[1] يوضح الدليل أهمية تحديد أدوار الوكلاء المختلفة ضمن المنصة وكيف تتواصل عبر أحداث وتنسيق متسلسل【317294138645208†L2601-L2624】.</p>
+      <p id="cite-react-1">[2] حلقة ReAct هي أساس دورة عمل كل وكيل: التفكير، التنفيذ، الملاحظة، اتخاذ القرار【317294138645208†L33-L96】.</p>
+      <p id="cite-ops-1">[3] مهام وكيل العمليات تشمل تأكيد الحجوزات وتنسيق الموردين وتعيين المرشدين【317294138645208†L17-L29】.</p>
+      <p id="cite-ops-2">[4] دورة عمل الوكيل تبدأ بتحميل السياق والتخطيط ثم تنفيذ الأدوات ومراقبة النتائج【317294138645208†L33-L96】.</p>
+      <p id="cite-ops-3">[5] قائمة الأدوات: التحقق من الحجز، الحصول على عقد المورد، إرسال التأكيد، تعيين المرشد، تصنيف الشكوى، اقتراح الحلول【317294138645208†L208-L270】.</p>
+      <p id="cite-fin-1">[6] مهام وكيل المالية تتضمن إصدار الفواتير وتتبع الدفعات والعمولات وكشف الاحتيال وتوقع التدفقات النقدية【317294138645208†L426-L431】.</p>
+      <p id="cite-fin-2">[7] دورة العمل تشمل التحقق والتخطيط، تنفيذ الأدوات، والتحقق من النتائج، ثم تحديث الدفاتر وإعداد التقارير【317294138645208†L443-L506】.</p>
+      <p id="cite-fin-3">[8] الأدوات المستخدمة: get_booking_financials، generate_invoice، calc_commission، send_invoice، match_payment، detect_fraud_signals، forecast_cashflow وغيرها【317294138645208†L600-L672】.</p>
+      <p id="cite-price-1">[9] وكيل التسعير يراقب الطلب وسرعة الحجوزات ويجمع بيانات المنافسين لإعادة تقدير الأسعار【317294138645208†L766-L846】.</p>
+      <p id="cite-price-2">[10] قائمة الأدوات تشمل get_departure_metrics، get_competitor_prices، calculate_optimal_price، check_margin_floor، apply_price_update وغيرها【317294138645208†L954-L1014】.</p>
+      <p id="cite-price-3">[11] يتم استخدام نموذج تسعير ديناميكي يعتمد على سرعة الحجز والأيام المتبقية حتى المغادرة【317294138645208†L1016-L1023】.</p>
+      <p id="cite-inv-1">[12] وكيل المخزون يضمن توافر المقاعد والغرف ويمنع الإفراط في البيع ويعيد موازنة التخصيص【317294138645208†L1065-L1076】.</p>
+      <p id="cite-inv-2">[13] دورة العمل تشمل حساب التوفر، مزامنة وتوزيع المخزون، التحقق من العتبات، وإعادة الفتح أو وقف البيع【317294138645208†L1094-L1147】.</p>
+      <p id="cite-inv-3">[14] الأدوات المستخدمة: get_live_inventory، update_inventory، sync_supplier_availability، rebalance_channel_inventory، trigger_stop_sale، release_allotment، forecast_fill_rate، detect_slow_sellers【317294138645208†L1264-L1299】.</p>
+      <p id="cite-rec-1">[15] وكيل التوصيات يركز على التوصية بمنتجات إضافية مخصصة اعتماداً على التاريخ والسلوك【317294138645208†L1366-L1379】.</p>
+      <p id="cite-rec-2">[16] دورة العمل تشمل تفعيل سياق التوصية، إعداد الملف الشخصي، البحث عن منتج مشابه، توليد التوصيات، الفلترة، التقديم والتتبع【317294138645208†L1390-L1444】.</p>
+      <p id="cite-rec-3">[17] الأدوات المستخدمة: get_customer_profile، search_similar_products، get_available_excursions، rank_recommendations، check_upsell_eligibility، suggest_upgrade، track_recommendation_click وغيرها【317294138645208†L1546-L1589】.</p>
+      <p id="cite-res-1">[18] وكيل الحجوزات يدير إنشاء وتعديل وإلغاء الحجوزات ويتأكد من توفر المقاعد وسريان السياسات【317294138645208†L1653-L1663】.</p>
+      <p id="cite-res-2">[19] دورة العمل تشمل استقبال الطلب، التحقق من التوفر والقواعد، حساب التكاليف، ثم تنفيذ التغييرات وإصدار الوثائق【317294138645208†L1667-L1732】.</p>
+      <p id="cite-res-3">[20] الأدوات المستخدمة: check_availability، calculate_booking_price، calculate_modification_cost، calculate_cancellation_penalty، create_booking، modify_booking، cancel_booking، generate_booking_documents، notify_all_parties【317294138645208†L1844-L1885】.</p>
+      <p id="cite-reloc-1">[21] وكيل إعادة التسكين يعالج حالات الطوارئ كإلغاء الرحلات أو الكوارث الطبيعية ويبحث عن بدائل مناسبة【317294138645208†L1946-L1960】.</p>
+      <p id="cite-reloc-2">[22] دورة العمل تشمل تقييم التأثير، البحث عن بدائل، التحسين، الموافقة، إعادة الحجز والتواصل【317294138645208†L1970-L2024】.</p>
+      <p id="cite-reloc-3">[23] الأدوات: get_affected_bookings، search_alternatives، evaluate_alternative، execute_mass_rebooking، calculate_compensation، send_emergency_notification، file_supplier_claim、generate_incident_report【317294138645208†L2122-L2158】.</p>
+      <p id="cite-replan-1">[24] وكيل إعادة التخطيط يعيد هيكلة خط سير الرحلة استجابة للتغييرات المفاجئة مع الحفاظ على تجربة العميل【317294138645208†L2214-L2227】.</p>
+      <p id="cite-replan-2">[25] دورة العمل: تحميل خط السير، تحليل التعارضات، البحث عن البدائل، إنشاء مسار جديد، الحصول على الموافقة، وتنفيذ التعديلات【317294138645208†L2249-L2296】.</p>
+      <p id="cite-replan-3">[26] الأدوات: get_full_itinerary، detect_itinerary_conflicts، search_activity_alternatives، check_hotel_flexibility、generate_revised_itinerary、update_all_bookings、recalculate_trip_cost、send_revised_documents【317294138645208†L2411-L2444】.</p>
+      <p id="cite-copilot-1">[27] يوفر المساعد الذكي طبقة موحدة للأسئلة الإدارية ومراقبة مؤشرات الأداء【317294138645208†L2450-L2459】.</p>
+      <p id="cite-copilot-2">[28] دورة العمل تشمل تحليل السؤال، توجيهه للوكلاء المناسبين، جمع الإجابات، تلخيصها، وتقديم توصيات【317294138645208†L2476-L2534】.</p>
+      <p id="cite-copilot-3">[29] الأدوات: query_all_agents، get_kpi_dashboard、detect_anomalies، generate_daily_briefing、identify_opportunities、run_scenario_model、coordinate_cross_agent_action【317294138645208†L2550-L2599】.</p>
+      <p id="cite-multi-1">[30] يعرض الدليل استخدام نظام أحداث (Kafka) لربط الوكلاء من خلال أحداث مثل تغيير الأسعار【317294138645208†L2601-L2624】.</p>
+      <p id="cite-multi-2">[31] مثال تنسيق: تحديث الأسعار ينبه وكيل المخزون والمالية ليقوما بتحديث بياناتهما【317294138645208†L2627-L2645】.</p>
+      <p id="cite-concl-1">[32] تشجع الوثيقة على استخدام أطر مثل LangGraph وربطها بنماذج OpenAI لتطوير الوكلاء وتطبيق بوابات التحقق لضمان الجودة【317294138645208†L2476-L2534】.</p>
+    </div>
+  </div>
+  <!-- Custom scripts -->
+  <script src="script.js"></script>
+</body>
+</html>
