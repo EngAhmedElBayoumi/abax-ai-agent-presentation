@@ -260,6 +260,8 @@ pre {
   overflow-x: auto;
   margin-bottom: 20px;
   max-width: 90%;
+  direction: ltr;
+  text-align: left;
 }
 
 pre code {

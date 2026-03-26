@@ -104,17 +104,17 @@
             لتنفيذ وكيل العمليات في إطار <code>Django</code> مع نموذج <code>OpenAI</code> يمكن تعريف كل أداة كدالة Python مسجلة من خلال 
             <code>@method_tool</code>. يستخدم الوكيل حلقة ReAct ليحدد الترتيب الصحيح للأدوات طبقاً للسياق.
           </p>
-          <pre><code># تعريف أدوات وكيل العمليات (مختصرة)
+          <pre><code># Define Operations Agent Tools (brief)
 @method_tool def verify_booking(booking_id: int) -> bool: ...
 @method_tool def get_supplier_contract(supplier_id: int) -> dict: ...
 @method_tool def generate_voucher(booking_id: int) -> str: ...
 @method_tool def assign_guide(booking_id: int) -> dict: ...</code></pre>
-          <pre><code># إنشاء وكيل ReAct وتنفيذ دورة تأكيد الحجز
+          <pre><code># Create ReAct agent and execute booking verification cycle
 ops_agent = create_react_agent(
     tools=[verify_booking, get_supplier_contract, generate_voucher, assign_guide],
     llm=openai_model
 )
-response = ops_agent("الرجاء تأكيد الحجز رقم 123 وتعيين مرشد")
+response = ops_agent("Please confirm booking 123 and assign a guide")
 print(response)</code></pre>
           <p>عند استقبال طلب تأكيد الحجز، يمر الوكيل بالمراحل التالية:</p>
           <ul>
@@ -160,32 +160,32 @@ print(response)</code></pre>
           <p>
             يختص وكيل المالية بإصدار الفواتير، حساب العمولات، مطابقة الدفعات وكشف الاحتيال. يمكن تعريف هذه الوظائف كأدوات مستقلة ثم ربطها بوكيل ReAct.
           </p>
-          <pre><code># أدوات وكيل المالية
+          <pre><code># Finance Agent Tools
 @method_tool
 def generate_invoice(booking_id: int) -> dict:
-    """يولد فاتورة مفصلة للعميل والمورد."""
+    """Generates detailed invoice for client and supplier."""
     return {"invoice_id": "INV-0456", "amount": 1500.0}
 
 @method_tool
 def calc_commission(booking_id: int) -> float:
-    """يحسب عمولة الشركة من الحجز."""
+    """Calculates company commission from booking."""
     return 75.0
 
 @method_tool
 def match_payment(invoice_id: str, transaction_id: str) -> bool:
-    """يطابق دفعة البنك مع الفاتورة."""
+    """Matches bank payment with invoice."""
     return True
 
 @method_tool
 def detect_fraud_signals(booking_id: int) -> bool:
-    """يراقب إشارات الاحتيال على الحجز."""
+    """Monitors fraud signals on booking."""
     return False</code></pre>
-          <pre><code># إنشاء الوكيل وتنفيذ الطلب المالي
+          <pre><code># Create agent and execute finance request
 finance_agent = create_react_agent(
     tools=[generate_invoice, calc_commission, match_payment, detect_fraud_signals],
     llm=openai_model
 )
-result = finance_agent("أصدر فاتورة للحجز 123 وتابع الدفعات والاحتيال")
+result = finance_agent("Issue invoice for booking 123 and track payments and fraud")
 print(result)</code></pre>
           <p>تتبع دورة الطلب المالي المراحل التالية:</p>
           <ul>
@@ -231,38 +231,38 @@ print(result)</code></pre>
           <p>
             يعتمد وكيل التسعير على مراقبة الطلب وسرعة الحجوزات وأسعار المنافسين لتوليد أسعار ديناميكية. تُعرّف الأدوات للحصول على المؤشرات وحساب السعر الأمثل ومراجعة الهامش ثم تنفيذ التحديث.
           </p>
-          <pre><code># أدوات التسعير
+          <pre><code># Pricing Tools
 @method_tool
 def get_departure_metrics(departure_id: int) -> dict:
-    """يجمع معدل الحجز والأيام المتبقية."""
+    """Collects booking pace and remaining days."""
     return {"booking_pace": 0.8, "days_left": 30}
 
 @method_tool
 def get_competitor_prices(departure_id: int) -> list:
-    """يسترجع أسعار المنافسين لنفس الرحلة."""
+    """Retrieves competitor prices for the same trip."""
     return [1150.0, 1200.0, 1180.0]
 
 @method_tool
 def calculate_optimal_price(departure_id: int) -> float:
-    """يحسب السعر الأمثل باستخدام نموذج ديناميكي."""
-    # يستخدم pace & days_left للتسعير
+    """Calculates optimal price using dynamic model."""
+    # Uses pace & days_left for pricing
     return 1199.0
 
 @method_tool
 def check_margin_floor(price: float) -> bool:
-    """يتحقق من عدم كسر هامش الربح الأدنى."""
+    """Checks minimum profit margin is not broken."""
     return price >= 1100.0
 
 @method_tool
 def apply_price_update(departure_id: int, new_price: float) -> str:
-    """يطبق السعر الجديد على النظام."""
+    """Applies new price to the system."""
     return "price updated"</code></pre>
-          <pre><code># إنشاء وكيل التسعير
+          <pre><code># Create Pricing Agent
 pricing_agent = create_react_agent(
     tools=[get_departure_metrics, get_competitor_prices, calculate_optimal_price, check_margin_floor, apply_price_update],
     llm=openai_model
 )
-result = pricing_agent("حدّث أسعار رحلة رقم 567 إذا استدعى الأمر")
+result = pricing_agent("Update prices for trip 567 if necessary")
 print(result)</code></pre>
           <p>تتبع دورة تحديث التسعير الخطوات التالية:</p>
           <ul>
@@ -310,32 +310,32 @@ print(result)</code></pre>
           <p>
             يضمن وكيل المخزون صحة المخزون عبر الموردين والقنوات، ويعيد موازنة الأرصدة ويمنع الإفراط في البيع. تُعرّف الأدوات لجلب التوفر وتحديثه وإعادة توزيع الحصص وإدارة الوقف/الإعادة.
           </p>
-          <pre><code># أدوات المخزون
+          <pre><code># Inventory Tools
 @method_tool
 def get_live_inventory(product_id: int) -> dict:
-    """يسترجع التوفر الحالي لكل قناة ومورد."""
+    """Retrieves live inventory for each channel and supplier."""
     return {"supplier_a": 20, "supplier_b": 10}
 
 @method_tool
 def update_inventory(product_id: int, channel: str, delta: int) -> None:
-    """يحدث الكمية المتاحة في القناة المحددة."""
+    """Updates available quantity in the specified channel."""
     pass
 
 @method_tool
 def rebalance_channel_inventory(product_id: int) -> None:
-    """يعيد موازنة الكميات بين القنوات للسماح بالمبيعات المثلى."""
+    """Rebalances quantities between channels allowing optimal sales."""
     pass
 
 @method_tool
 def trigger_stop_sale(product_id: int) -> None:
-    """يوقف بيع منتج عند نفاد المخزون."""
+    """Triggers stop sale for a product when out of stock."""
     pass</code></pre>
-          <pre><code># إنشاء وكيل المخزون
+          <pre><code># Create Inventory Agent
 inventory_agent = create_react_agent(
     tools=[get_live_inventory, update_inventory, rebalance_channel_inventory, trigger_stop_sale],
     llm=openai_model
 )
-response = inventory_agent("تأكد من توافر مقاعد الرحلة 789 وقم بإعادة توزيع المخزون إذا لزم")
+response = inventory_agent("Ensure availability of seats for trip 789 and rebalance inventory if needed")
 print(response)</code></pre>
           <p>تعمل دورة طلب المخزون كالتالي:</p>
           <ul>
@@ -381,32 +381,32 @@ print(response)</code></pre>
           <p>
             يهدف وكيل التوصيات إلى زيادة المبيعات عبر اقتراح منتجات إضافية أو ترقية الرحلات. يتم ذلك من خلال تحليل الملف الشخصي، البحث عن منتجات مشابهة، تصنيف النتائج، ثم عرض أفضل الاقتراحات.
           </p>
-          <pre><code># أدوات التوصيات
+          <pre><code># Recommendation Tools
 @method_tool
 def get_customer_profile(customer_id: int) -> dict:
-    """يحصل على بيانات العميل وسلوكياته السابقة."""
+    """Gets customer profile and past behaviors."""
     return {"segment": "VIP", "past_bookings": ["rome", "paris"]}
 
 @method_tool
 def search_similar_products(query: str) -> list:
-    """يبحث عن منتجات أو أنشطة مشابهة للرحلة الحالية."""
-    return ["جولة في المتحف", "تذكرة مسرح", "تجربة تذوق الطعام"]
+    """Searches for products or activities similar to the current trip."""
+    return ["Museum Tour", "Theater Ticket", "Gastronomic Experience"]
 
 @method_tool
 def rank_recommendations(products: list, customer_profile: dict) -> list:
-    """يرتب المنتجات وفقاً لاحتمال اختيار العميل لها."""
+    """Ranks products based on customer likelihood of selection."""
     return sorted(products)
 
 @method_tool
 def check_upsell_eligibility(customer_id: int, product: str) -> bool:
-    """يتحقق من أهلية العميل للترقية أو العرض."""
+    """Checks customer eligibility for upgrade or offer."""
     return True</code></pre>
-          <pre><code># إنشاء وكيل التوصيات
+          <pre><code># Create Recommendation Agent
 rec_agent = create_react_agent(
     tools=[get_customer_profile, search_similar_products, rank_recommendations, check_upsell_eligibility],
     llm=openai_model
 )
-output = rec_agent("اقترح أنشطة إضافية للحجز الحالي للعميل 42")
+output = rec_agent("Suggest additional activities for the current booking for customer 42")
 print(output)</code></pre>
           <p>دورة التوصية تمر بالخطوات الآتية:</p>
           <ul>
@@ -453,37 +453,37 @@ print(output)</code></pre>
           <p>
             يتولى وكيل الحجوزات إدارة دورة حياة الحجز بالكامل، بما في ذلك إنشاء الحجز وتعديله أو إلغائه وفقاً للتوفر والسياسات. تُعرّف الأدوات للتحقق من التوفر وحساب التكلفة وتنفيذ الإجراءات.
           </p>
-          <pre><code># أدوات الحجوزات
+          <pre><code># Reservation Tools
 @method_tool
 def check_availability(product_id: int, date: str) -> bool:
-    """يتحقق من توفر مقعد أو غرفة في التاريخ المحدد."""
+    """Checks availability of seat or room on specified date."""
     return True
 
 @method_tool
 def calculate_booking_price(product_id: int, date: str) -> float:
-    """يحسب السعر الإجمالي للحجز بما في ذلك الرسوم والضرائب."""
+    """Calculates total booking price including fees and taxes."""
     return 1450.0
 
 @method_tool
 def create_booking(customer_id: int, product_id: int, date: str) -> dict:
-    """ينشئ الحجز في النظام."""
+    """Creates booking in the system."""
     return {"booking_id": 789, "status": "confirmed"}
 
 @method_tool
 def modify_booking(booking_id: int, new_date: str) -> dict:
-    """يعدّل الحجز القائم."""
+    """Modifies existing booking."""
     return {"booking_id": booking_id, "new_date": new_date}
 
 @method_tool
 def cancel_booking(booking_id: int) -> dict:
-    """يلغي الحجز ويعيد الرسوم حسب السياسة."""
+    """Cancels booking and refunds fees according to policy."""
     return {"booking_id": booking_id, "cancelled": True}</code></pre>
-          <pre><code># وكيل الحجوزات
+          <pre><code># Reservation Agent
 reservation_agent = create_react_agent(
     tools=[check_availability, calculate_booking_price, create_booking, modify_booking, cancel_booking],
     llm=openai_model
 )
-resp = reservation_agent("احجز رحلة للعميل 42 بتاريخ 2026-05-10")
+resp = reservation_agent("Book a trip for customer 42 on 2026-05-10")
 print(resp)</code></pre>
           <p>يعمل الوكيل وفق دورة واضحة:</p>
           <ul>
@@ -530,32 +530,32 @@ print(resp)</code></pre>
           <p>
             يتعامل وكيل إعادة التسكين مع الحالات الطارئة مثل إلغاء الرحلات أو الكوارث الطبيعية، ويبحث عن بدائل ملائمة بسرعة. تُعرّف الأدوات لتحديد الحجوزات المتأثرة والبحث عن البدائل وتقييمها ثم تنفيذ إعادة الحجز وتعويض العملاء.
           </p>
-          <pre><code># أدوات إعادة التسكين
+          <pre><code># Relocation Tools
 @method_tool
 def get_affected_bookings(event_id: str) -> list:
-    """يحدد الحجوزات المتأثرة بالحدث الطارئ."""
+    """Identifies bookings affected by the emergency event."""
     return [321, 322, 323]
 
 @method_tool
 def search_alternatives(original_booking_id: int) -> list:
-    """يبحث عن خيارات بديلة للحجز المتضرر."""
-    return ["فندق بديل", "رحلة أخرى", "استرداد نقدي"]
+    """Searches for alternative options for the affected booking."""
+    return ["Alternative Hotel", "Another Flight", "Cash Refund"]
 
 @method_tool
 def evaluate_alternative(alternative: str) -> float:
-    """يقيّم تكلفة وملائمة البديل."""
+    """Evaluates cost and suitability of the alternative."""
     return 0.8
 
 @method_tool
 def execute_mass_rebooking(bookings: list, alternative: str) -> None:
-    """يعيد الحجز لمجموعة من العملاء على البديل المختار."""
+    """Rebooks a group of clients to the selected alternative."""
     pass</code></pre>
-          <pre><code># إنشاء وكيل إعادة التسكين
+          <pre><code># Create Relocation Agent
 relocation_agent = create_react_agent(
     tools=[get_affected_bookings, search_alternatives, evaluate_alternative, execute_mass_rebooking],
     llm=openai_model
 )
-out = relocation_agent("حدث إلغاء رحلة رقم 500، اعثر على بدائل مناسبة")
+out = relocation_agent("Flight 500 got cancelled, find suitable alternatives")
 print(out)</code></pre>
           <p>تمر دورة إعادة التسكين بالمراحل الآتية:</p>
           <ul>
@@ -602,32 +602,32 @@ print(out)</code></pre>
           <p>
             وكيل إعادة التخطيط مسؤول عن تعديل خط سير الرحلة عندما تتغير الظروف (تأخير رحلة، طلب العميل، إلغاء نشاط). تُعرّف الأدوات لجلب المسار الكامل، اكتشاف التعارضات، البحث عن البدائل، وتوليد مسار جديد.
           </p>
-          <pre><code># أدوات إعادة التخطيط
+          <pre><code># Replanning Tools
 @method_tool
 def get_full_itinerary(booking_id: int) -> dict:
-    """يجلب خط سير الرحلة بالكامل بما في ذلك الأنشطة والفنادق."""
+    """Fetches full itinerary including activities and hotels."""
     return {"itinerary": ["hotel A","tour B","flight C"]}
 
 @method_tool
 def detect_itinerary_conflicts(itinerary: dict) -> list:
-    """يكتشف التعارضات مثل التوقيت أو الفجوات."""
-    return ["tour B و flight C overlap"]
+    """Detects conflicts such as timing or gaps."""
+    return ["tour B and flight C overlap"]
 
 @method_tool
 def search_activity_alternatives(activity: str) -> list:
-    """يجد أنشطة بديلة قابلة للحجز."""
+    """Finds alternative bookable activities."""
     return ["tour D","tour E"]
 
 @method_tool
 def generate_revised_itinerary(original: dict, updates: dict) -> dict:
-    """ينشئ مساراً معدلاً يتضمن البدائل المحددة."""
+    """Generates revised itinerary containing selected alternatives."""
     return {"itinerary": ["hotel A","tour D","flight C"]}</code></pre>
-          <pre><code># وكيل إعادة التخطيط
+          <pre><code># Replanning Agent
 replan_agent = create_react_agent(
     tools=[get_full_itinerary, detect_itinerary_conflicts, search_activity_alternatives, generate_revised_itinerary],
     llm=openai_model
 )
-reply = replan_agent("أعد تخطيط الرحلة للحجز 789 بسبب إلغاء نشاط")
+reply = replan_agent("Replan the trip for booking 789 due to activity cancellation")
 print(reply)</code></pre>
           <p>المراحل الرئيسية في دورة إعادة التخطيط:</p>
           <ul>
@@ -674,32 +674,32 @@ print(reply)</code></pre>
           <p>
             يعمل المساعد الذكي كطبقة موحدة للإدارة، يجمع الأسئلة ويوجهها للوكلاء المناسبين، يجمع النتائج ويقدم التقارير، ويكتشف الفرص والشذوذات. تُعرّف الأدوات لسؤال جميع الوكلاء، الحصول على لوحة المؤشرات، اكتشاف الشذوذات وتنسيق الإجراءات.
           </p>
-          <pre><code># أدوات المساعد الذكي
+          <pre><code># AI Copilot Tools
 @method_tool
 def query_all_agents(query: str) -> dict:
-    """يرسل الاستفسار لجميع الوكلاء ويجمع الردود."""
+    """Sends query to all agents and collects responses."""
     return {"operations": "...", "finance": "..."}
 
 @method_tool
 def get_kpi_dashboard() -> dict:
-    """يستخرج مؤشرات الأداء الرئيسية للمنصة."""
+    """Extracts key performance indicators for the platform."""
     return {"bookings": 1200, "revenue": 45000}
 
 @method_tool
 def detect_anomalies() -> list:
-    """يكتشف الشذوذات في البيانات."""
-    return ["انخفاض في الحجوزات على وجهة معينة"]
+    """Detects anomalies in the data."""
+    return ["Drop in bookings for a specific destination"]
 
 @method_tool
 def coordinate_cross_agent_action(actions: dict) -> None:
-    """ينسق تنفيذ إجراءات بين الوكلاء بعد الحصول على الموافقة."""
+    """Coordinates execution of actions across agents after approval."""
     pass</code></pre>
-          <pre><code># إنشاء المساعد الذكي
+          <pre><code># Create AI Copilot
 copilot_agent = create_react_agent(
     tools=[query_all_agents, get_kpi_dashboard, detect_anomalies, coordinate_cross_agent_action],
     llm=openai_model
 )
-summary = copilot_agent("قدّم تقريراً يومياً عن الأداء مع كشف أي شذوذات")
+summary = copilot_agent("Provide daily performance report and detect any anomalies")
 print(summary)</code></pre>
           <p>دورة طلب المساعد الذكي تتضمن:</p>
           <ul>
